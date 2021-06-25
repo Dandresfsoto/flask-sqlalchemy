@@ -40,7 +40,7 @@ except ImportError:
     _app_ctx_stack = None
 
 
-__version__ = '3.0-dev'
+__version__ = '2.1'
 
 
 # Which stack should we use?  _app_ctx_stack is new in 0.9
@@ -53,6 +53,17 @@ _signals = Namespace()
 
 models_committed = _signals.signal('models-committed')
 before_models_committed = _signals.signal('before-models-committed')
+
+
+def _sa_url_set(url, **kwargs):
+    try:
+        url = url.set(**kwargs)
+    except AttributeError:
+        # SQLAlchemy <= 1.3
+        for key, value in kwargs.items():
+            setattr(url, key, value)
+
+    return url
 
 
 def _make_table(db):
@@ -891,7 +902,8 @@ class SQLAlchemy(object):
 
             # if it's not an in memory database we make the path absolute.
             if not detected_in_memory:
-                info.database = os.path.join(app.root_path, info.database)
+                pass
+                #info.database = os.path.join(app.root_path, info.database)
 
         unu = app.config['SQLALCHEMY_NATIVE_UNICODE']
         if unu is None:
